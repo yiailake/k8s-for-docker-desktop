@@ -1,11 +1,14 @@
 # 为中国用户在 Docker for Mac/Windows 中开启 Kubernetes 
 
-中文|[English](README_en.md)
+中文 | [English](README_en.md)
 
 说明: 
 
 * 需安装 Docker for Mac或者Docker for Windows，如果没有请下载[下载 Docker CE最新版本](https://store.docker.com/search?type=edition&offering=community)
-* 当前 master 分支已经在 Docker for Mac/Windows 18.09/18.06 (包含 Kubernetes 1.10.3) 版本测试通过，如果你希望使用 18.03 版本, 请使用下面命令切换 18.03 分支 ```git checkout 18.03```
+* 当前 master 分支已经在 Docker for Mac/Windows 2.0.1.x (包含 Docker CE 18.09.1 和 Kubernetes 1.13.0) 版本测试通过
+  * 如果你希望使用 Docker for Mac/Windows 2.0.0.2/2.0.0.3 (包含 Docker CE 18.09.1 和 Kubernetes 1.10.11) , 请使用下面命令切换 [v2.0.0.2 分支](https://github.com/AliyunContainerService/k8s-for-docker-desktop/tree/v2.0.0.2) ```git checkout v2.0.0.2```
+  * 如果你希望使用 18.09/18.06 版本(包含 Kubernetes 1.10.3) , 请使用下面命令切换 [18.09 分支](https://github.com/AliyunContainerService/k8s-for-docker-desktop/tree/18.09) ```git checkout 18.09```
+  * 如果你希望使用 18.03 版本, 请使用下面命令切换 [18.03 分支](https://github.com/AliyunContainerService/k8s-for-docker-desktop/tree/18.03) ```git checkout 18.03```
 
 ### Docker for Mac 开启 Kubernetes
 
@@ -100,22 +103,32 @@ kubectl proxy
 
 http://localhost:8001/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/#!/overview?namespace=default
 
-### 配置 kubeconfig (可选)
+### 配置 kubeconfig (可跳过)
 
-```bash
-$ TOKEN=$(kubectl -n kube-system describe secret default| awk '$1=="token:"{print $2}')
+
+对于Mac环境
+
+```shell
+TOKEN=$(kubectl -n kube-system describe secret default| awk '$1=="token:"{print $2}')
 kubectl config set-credentials docker-for-desktop --token="${TOKEN}"
 ```
 
-#### 选择 kubeconfig 文件
+对于Windows环境
+
+```shell
+$TOKEN=((kubectl -n kube-system describe secret default | Select-String "token:") -split " +")[1]
+kubectl config set-credentials docker-for-desktop --token="${TOKEN}"
+```
+
+#### 登录dashboard的时候选择 kubeconfig 文件
 
 ![resource](images/k8s_credentials.png)
 
 选择 kubeconfig 文件,路径如下：
 
 ```
-Win: %UserProfile%\.kube\config
 Mac: $HOME/.kube/config
+Win: %UserProfile%\.kube\config
 ```
 
 点击登陆，进入Kubernetes Dashboard
@@ -184,7 +197,7 @@ kubectl delete -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/mas
 brew install kubernetes-helm
 
 # Install Tiller into your Kubernetes cluster
-helm init --upgrade -i registry.cn-hangzhou.aliyuncs.com/google_containers/tiller:v2.11.0 --skip-refresh
+helm init --upgrade -i registry.cn-hangzhou.aliyuncs.com/google_containers/tiller:v2.12.2 --skip-refresh
 
 # update charts repo (Optional)
 helm repo update
@@ -194,10 +207,11 @@ helm repo update
 
 ```shell
 # Use Chocolatey on Windows
+# 注：安装的时候需要保证网络能够访问googleapis这个域名
 choco install kubernetes-helm
 
 # Install Tiller into your Kubernetes cluster
-helm init --upgrade -i registry.cn-hangzhou.aliyuncs.com/google_containers/tiller:v2.11.0 --skip-refresh
+helm init --upgrade -i registry.cn-hangzhou.aliyuncs.com/google_containers/tiller:v2.12.2 --skip-refresh
 
 # update charts repo (Optional)
 helm repo update

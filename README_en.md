@@ -1,10 +1,13 @@
 # Enable Kubernetes on Docker for Mac/Windows in China
 
-[中文](README.md)|English
+[中文](README.md) | English
 
 NOTE: 
 
-* The master branch is tested with Docker for Mac/Windows 18.09/18.06 (with Kubernetes 1.10.3). If you want to use 18.03, please use the 18.03 branch ```git checkout 18.03```
+* The master branch is tested with Docker for Mac/Windows version 2.0.1.x (with Docker 18.09.1 and Kubernetes 1.13.0). 
+  * If you want to use v2.0.0.2/v2.0.0.3 (with Docker CE 18.09.1 and Kubernetes 1.10.11), please use the 18.09 branch ```git checkout v2.0.0.2```
+  * If you want to use Docker CE 18.09/18.06 (with Kubernetes 1.10.3), please use the 18.09 branch ```git checkout 18.09```
+  * If you want to use Docker CE 18.03, please use the 18.03 branch ```git checkout 18.03```
 
 ### Enable Kubernetes on Docker for Mac
 
@@ -99,12 +102,19 @@ Access Kubernetes dashboard
 
 http://localhost:8001/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/#!/overview?namespace=default
 
-#### Config kubeconfig
+#### Config kubeconfig (Or skip)
 
-![resource](images/k8s_credentials.png)
+For Mac
 
 ```bash
-$ TOKEN=$(kubectl -n kube-system describe secret default| awk '$1=="token:"{print $2}')
+TOKEN=$(kubectl -n kube-system describe secret default| awk '$1=="token:"{print $2}')
+kubectl config set-credentials docker-for-desktop --token="${TOKEN}"
+```
+
+For Windows
+
+```cmd
+$TOKEN=((kubectl -n kube-system describe secret default | Select-String "token:") -split " +")[1]
 kubectl config set-credentials docker-for-desktop --token="${TOKEN}"
 ```
 
@@ -125,12 +135,28 @@ Click login, go to Kubernetes Dashboard
 
 Install helm following the instruction on https://github.com/helm/helm/blob/master/docs/install.md
 
+#### For Mac OS
+
 ```shell
 # Use homebrew on Mac
 brew install kubernetes-helm
 
 # Install Tiller into your Kubernetes cluster
-helm init --upgrade -i registry.cn-hangzhou.aliyuncs.com/google_containers/tiller:v2.11.0 --skip-refresh
+helm init --upgrade -i registry.cn-hangzhou.aliyuncs.com/google_containers/tiller:v2.12.2 --skip-refresh
+
+# update charts repo (Optional)
+helm repo update
+```
+
+#### For Windows
+
+```shell
+# Use Chocolatey on Windows
+# NOTE: please ensure you can access googleapis
+choco install kubernetes-helm
+
+# Install Tiller into your Kubernetes cluster
+helm init --upgrade -i registry.cn-hangzhou.aliyuncs.com/google_containers/tiller:v2.12.2 --skip-refresh
 
 # update charts repo (Optional)
 helm repo update
@@ -176,7 +202,7 @@ kubectl apply -f samples/bookinfo/networking/bookinfo-gateway.yaml
 
 Confirm application is running
 
-```bash
+​```bash
 export GATEWAY_URL=localhost:80
 curl -o /dev/null -s -w "%{http_code}\n" http://${GATEWAY_URL}/productpage
 ```
